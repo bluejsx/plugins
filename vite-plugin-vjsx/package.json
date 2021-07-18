@@ -1,0 +1,21 @@
+{
+  "name": "vite-plugin-vjsx",
+  "version": "0.0.0",
+  "description": "vanilla jsx plugin for vitejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsc index.ts && node index.js"
+  },
+  "keywords": [
+    "vite-plugin"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^15.12.2",
+    "bluejsx": "0.1.2",
+    "node-fetch": "^2.6.1",
+    "typescript": "^4.3.2",
+    "typescript-parser": "^2.6.1",
+    "vite": "^2.2.4"
+  }
+}
