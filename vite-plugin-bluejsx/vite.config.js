@@ -1,8 +1,8 @@
+const path = require('path')
 /**
  * @type {import('vite').UserConfig}
  */
-const path = require('path')
-export default {
+export default ({
   esbuild: {
     jsxFactory: 'Blue.r',
     jsxFragment: 'Blue.Fragment',
@@ -25,4 +25,4 @@ export default {
       }
     }
   }
-}
+})
