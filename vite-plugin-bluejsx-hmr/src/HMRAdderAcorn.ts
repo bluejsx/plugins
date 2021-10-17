@@ -65,6 +65,7 @@ type ImportedJSXData = ImportsData['varNames'][0] & {
   refName?: string
   index: number
   hasRef?: boolean
+  attrObjCode?: string
 }
 
 
@@ -112,7 +113,7 @@ export default class HMRAdderAcorn extends HMRAdderBase {
     o.listenCode += 
 `
 if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
-  ${refObjectName}.${jsxComponent.refName}=${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}(${jsxComponent.name});
+  ${refObjectName}.${jsxComponent.refName}=${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}(${jsxComponent.name}, ${jsxComponent.attrObjCode ? jsxComponent.attrObjCode: 'null'});
   ${updateInitializeLines}
 }else{
   import.meta.hot.decline()
@@ -120,7 +121,19 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
 `
 
   }
-
+/*
+  ${jsxComponent.attrObjCode ? 
+    `for(const key in ${jsxComponent.attrObjCode}){
+      const prop = props[key]
+      if(key==='ref') continue
+      else if(isSVG || ONLY_VIA_SET_ATTRIBUTE.has(key) || key.includes('-')){
+        element.setAttribute(key, prop)
+      } else {
+        //let's see if there would be any problem with IDL attr
+        element[key] = prop
+      }
+    }`: ''}
+*/
   processFunctionCode(jsxComponents: ImportedJSXData[], funcNode: Node, funcCode: string, wholeCode: string): string {
     const insertRecord = this.getInsertRecord()
     const originalFuncCode = funcCode
@@ -186,6 +199,8 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
 
 
       if (attrNode.type === 'ObjectExpression') {
+        jsxComponent.attrObjCode = originalFuncCode.substring(attrNode.start, attrNode.end)
+
         const refAttrNode = attrNode.properties.find((v: Node) => v.key.name === 'ref')  // ref: [refs, 'elem']
 
         if (refAttrNode) {
@@ -295,22 +310,17 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
 
     let hotListenerCode = ''
     if (paramNode) {
-      hotListenerCode = 
-`\n${selfVarName}.${this.UPDATE_LISTENER_FUNC_NAME} = (Comp) =>{
-  const newElem=Comp(${this.PARAM_ALTER_NAME});
-  ${selfVarName}.before(newElem);
-  ${selfVarName}.remove();
-  return newElem
-}\n`
+      hotListenerCode = `const newElem=Blue.r(Comp, attr, ${this.PARAM_ALTER_NAME}.children)`
     } else {
-      hotListenerCode = 
-`\n${selfVarName}.${this.UPDATE_LISTENER_FUNC_NAME} = (Comp) =>{
-  const newElem=Comp();
-  ${selfVarName}.before(newElem);
-  ${selfVarName}.remove();
-  return newElem
-}\n`
+      hotListenerCode = `const newElem=Blue.r(Comp, attr)`
     }
+    hotListenerCode = 
+  `\n${selfVarName}.${this.UPDATE_LISTENER_FUNC_NAME} = (Comp, attr) =>{
+    ${hotListenerCode}
+    ${selfVarName}.before(newElem);
+    ${selfVarName}.remove();
+    return newElem
+  }\n`
     let listenerAdded = false
     for (const src in hotListenerInfo) {
       listenerAdded || (listenerAdded = true)
@@ -323,7 +333,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
 `\nif(import.meta.hot){
   ${hotListenerCode}
 }else{
-  console.warn('import.meta.hot not exist')
+  console.warn('import.meta.hot does not exist')
 }\n`
     }
     funcCode = this.insertCode(

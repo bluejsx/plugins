@@ -1,6 +1,6 @@
 {
   "name": "@bluejsx/vite-plugin-blue-hmr",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "vite plugin for HMR with Bluejsx.",
   "main": "./lib/index.cjs",
   "module": "./lib/index.js",
@@ -27,6 +27,7 @@
     "@swc/cli": "^0.1.51",
     "@swc/core": "^1.2.95",
     "@types/node": "^16.11.1",
+    "jsx-transform": "^2.4.1",
     "tsup": "^5.4.0",
     "typescript": "^4.4.4",
     "vite-node": "^0.0.5"

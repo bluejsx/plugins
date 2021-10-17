@@ -101,6 +101,7 @@ declare type ImportedJSXData = ImportsData['varNames'][0] & {
     refName?: string;
     index: number;
     hasRef?: boolean;
+    attrObjCode?: string;
 };
 declare class HMRAdderAcorn extends HMRAdderBase {
     Parser: typeof Parser;
