@@ -1,6 +1,6 @@
 {
   "name": "@bluejsx/vite-plugin-blue-hmr",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "vite plugin for HMR with Bluejsx.",
   "main": "./lib/index.cjs",
   "module": "./lib/index.js",

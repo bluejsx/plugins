@@ -24,7 +24,7 @@ export default function mdxToJS(options: MarkdownIt.Options = {}) {
       config = resolvedConfig
     },
     transform(code, id) {
-      if (/\.mdx$/.test(id)) {
+      if (!id.includes('node_modules') && /\.mdx$/.test(id)) {
         code = md.render(code)
         let imports = ''
         code = code.replace(regImports, (match)=>{
