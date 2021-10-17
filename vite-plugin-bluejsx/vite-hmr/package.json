@@ -1,0 +1,34 @@
+{
+  "name": "@bluejsx/vite-plugin-blue-hmr",
+  "version": "0.0.6",
+  "description": "vite plugin for HMR with Bluejsx.",
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "test": "vite-node",
+    "build-swc": "swc src/*.ts -d lib -C jsc.target=es2021",
+    "build": "tsup src/index.ts --format cjs,esm --dts --minify -d lib"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bluejsx/plugins.git"
+  },
+  "author": "Momijiichigo",
+  "license": "MIT",
+  "files": [
+    "lib/"
+  ],
+  "dependencies": {
+    "acorn": "^8.5.0"
+  },
+  "devDependencies": {
+    "@swc/cli": "^0.1.51",
+    "@swc/core": "^1.2.95",
+    "@types/node": "^16.11.1",
+    "tsup": "^5.4.0",
+    "typescript": "^4.4.4",
+    "vite-node": "^0.0.5"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "vite-bluejsx-with-pages",
+  "version": "1.0.0",
+  "description": "use pages with bluejsx and vite",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "vite": "latest",
+    "directory-tree": "latest"
+  },
+  "author": "MI",
+  "license": "MIT"
+}
