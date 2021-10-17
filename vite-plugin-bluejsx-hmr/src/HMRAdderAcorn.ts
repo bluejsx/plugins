@@ -166,16 +166,20 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
 
     const insertHotListenerPlace = isDirectJSXArrowReturnFunc ? relBodyEndIndex : retNode.start - funcNode.start;
 
-    [...funcCode.matchAll(/Blue\.r\(/g)].forEach(v => {
+    for(const v of funcCode.matchAll(/Blue\.r\(/g)){
       let blueCallNode: Node = this.Parser.parseExpressionAt(funcCode, v.index, { ecmaVersion: 'latest', sourceType: "module" })
 
       if (blueCallNode.type === 'SequenceExpression') {
         blueCallNode = blueCallNode.expressions.find(v => v.start === blueCallNode.start)
       }
       if (blueCallNode?.type === 'CallExpression' && blueCallNode?.arguments[1]?.type === 'ObjectExpression') {
-        refObjectName ??= blueCallNode.arguments[1].properties.find((v: Node) => v.key?.name === 'ref')?.value.elements[0].name
+        const name = blueCallNode.arguments[1].properties.find((v: Node) => v.key?.name === 'ref')?.value.elements[0].name
+        if(name){
+          refObjectName = name
+          break
+        }
       }
-    })
+    }
 
     jsxComponents.forEach(jsxComponent => {
       const attrNode = jsxComponent.node.arguments[1] // null | { attr: value }
@@ -203,7 +207,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
             });
 
             //find ref object name (refs)
-            [...originalFuncCode.matchAll(new RegExp(jsxComponent.refName, 'g'))].forEach(v => {
+            for(const v of originalFuncCode.matchAll(new RegExp(jsxComponent.refName, 'g'))){
               try {
                 const varNode = this.Parser.parseExpressionAt(originalFuncCode, v.index, { ecmaVersion: 'latest', sourceType: "module" })
                 if (varNode.type === 'AssignmentExpression' || varNode.type === 'CallExpression') {
@@ -215,7 +219,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
                   )
                 }
               } catch (e) { }
-            })
+            }
           }
           this.addHotListenerInfo(hotListenerInfo, jsxComponent, refObjectName, updateInitializeLines)
         } else {
@@ -412,7 +416,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
   /** returns list of  */
   getDependentJSXComponents(code: string, imports: ImportsData) {
     const jsxInfo: ImportedJSXData[] = [];
-    [...code.matchAll(/Blue\.r\(([A-Z][A-z_]*)/g)].forEach(v => {
+    for(const v of code.matchAll(/Blue\.r\(([A-Z][A-z_]*)/g)){
       const compName = v[1]
       let blueCallNode: Node = this.Parser.parseExpressionAt(code, v.index, { ecmaVersion: 'latest', sourceType: "module" })
 
@@ -431,7 +435,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
           jsxInfo.push(importedJSXData)
         }
       })
-    })
+    }
     return jsxInfo
   }
 
