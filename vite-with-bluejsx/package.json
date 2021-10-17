@@ -1,6 +1,6 @@
 {
   "name": "vite-with-bluejsx",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "vite config provider to enable BlueJSX on your project.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,6 +10,9 @@
   "module": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "type": "module",
+  "files": [
+    "lib/"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/bluejsx/plugins.git"
