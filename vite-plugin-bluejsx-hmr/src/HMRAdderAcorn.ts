@@ -77,7 +77,7 @@ export default class HMRAdderAcorn extends HMRAdderBase {
   }
   transform(code: string, path?: string) {
 
-    code = code.replace(/addEventListener/g, 'on').replace(/=>/g, '=> ')
+    code = code.replace(/=>/g, '=> ')
 
     const program = this.Parser.parse(code, { ecmaVersion: 'latest', sourceType: "module" })
     const originalCode = code
