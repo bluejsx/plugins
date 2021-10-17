@@ -34,6 +34,7 @@ export default function mdxToJS(options: MarkdownIt.Options = {}) {
         code = `${imports}import Blue from 'bluejsx';export default ()=>${jsx.fromString(`<div>${code}</div>`, {
           factory: 'Blue.r',
           passUnknownTagsToFactory: true,
+          arrayChildren: false,
         })}`
         if(config.mode==='development'){
           return hmrAdder.transform(code, id)

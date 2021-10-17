@@ -1,6 +1,6 @@
 {
   "name": "@bluejsx/vite-plugin-bluemdx",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "vite plugin for .mdx files with Bluejsx.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -14,6 +14,9 @@
     "type": "git",
     "url": "git://github.com/bluejsx/plugins.git"
   },
+  "files": [
+    "lib/"
+  ],
   "author": "Momijiichigo",
   "license": "MIT",
   "dependencies": {
