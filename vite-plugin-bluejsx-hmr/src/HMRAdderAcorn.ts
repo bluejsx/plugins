@@ -86,7 +86,7 @@ export default class HMRAdderAcorn extends HMRAdderBase {
     const exportedFuncs = this.getExportedFunctions((program as any).body as Node[]);
     const insertRecord = this.getInsertRecord()
 
-    exportedFuncs.forEach((funcNode: Node | any) => {
+    for (const funcNode of exportedFuncs) {
       const { start, end } = funcNode
       const funcCode = this.getCodeFragment([start, end], code, insertRecord)
       const jsxComponents = this.getDependentJSXComponents(funcCode, imports)
@@ -99,7 +99,7 @@ export default class HMRAdderAcorn extends HMRAdderBase {
         insertRecord
       )
 
-    })
+    }
     return code
   }
   /////////////////
@@ -110,10 +110,10 @@ export default class HMRAdderAcorn extends HMRAdderBase {
     }
     const o = hotListenerInfo[jsxComponent.info.src]
     o.varMapCode += `${jsxComponent.info.imports[jsxComponent.name]}:${jsxComponent.name},`
-    o.listenCode += 
-`
+    o.listenCode +=
+      `
 if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
-  ${refObjectName}.${jsxComponent.refName}=${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}(${jsxComponent.name}, ${jsxComponent.attrObjCode ? jsxComponent.attrObjCode: 'null'});
+  ${refObjectName}.${jsxComponent.refName}=${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}(${jsxComponent.name}, ${jsxComponent.attrObjCode ? jsxComponent.attrObjCode : 'null'});
   ${updateInitializeLines}
 }else{
   import.meta.hot.decline()
@@ -121,19 +121,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
 `
 
   }
-/*
-  ${jsxComponent.attrObjCode ? 
-    `for(const key in ${jsxComponent.attrObjCode}){
-      const prop = props[key]
-      if(key==='ref') continue
-      else if(isSVG || ONLY_VIA_SET_ATTRIBUTE.has(key) || key.includes('-')){
-        element.setAttribute(key, prop)
-      } else {
-        //let's see if there would be any problem with IDL attr
-        element[key] = prop
-      }
-    }`: ''}
-*/
+
   processFunctionCode(jsxComponents: ImportedJSXData[], funcNode: Node, funcCode: string, wholeCode: string): string {
     const insertRecord = this.getInsertRecord()
     const originalFuncCode = funcCode
@@ -179,7 +167,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
 
     const insertHotListenerPlace = isDirectJSXArrowReturnFunc ? relBodyEndIndex : retNode.start - funcNode.start;
 
-    for(const v of funcCode.matchAll(/Blue\.r\(/g)){
+    for (const v of funcCode.matchAll(/Blue\.r\(/g)) {
       let blueCallNode: Node = this.Parser.parseExpressionAt(funcCode, v.index, { ecmaVersion: 'latest', sourceType: "module" })
 
       if (blueCallNode.type === 'SequenceExpression') {
@@ -187,14 +175,14 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
       }
       if (blueCallNode?.type === 'CallExpression' && blueCallNode?.arguments[1]?.type === 'ObjectExpression') {
         const name = blueCallNode.arguments[1].properties.find((v: Node) => v.key?.name === 'ref')?.value.elements[0].name
-        if(name){
+        if (name) {
           refObjectName = name
           break
         }
       }
     }
 
-    jsxComponents.forEach(jsxComponent => {
+    for (const jsxComponent of jsxComponents) {
       const attrNode = jsxComponent.node.arguments[1] // null | { attr: value }
 
 
@@ -212,17 +200,17 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
 
           if (!isDirectJSXArrowReturnFunc) {
             // take any statements which uses updated components
-            bodyNodes.forEach(({ type, start, end }) => {
+            for (const { type, start, end } of bodyNodes) {
               const relStart = start - funcNode.start, relEnd = end - funcNode.start
               const statement = originalFuncCode.substring(relStart, relEnd)
 
               if (type === 'ExpressionStatement' && originalFuncCode.indexOf(jsxComponent.refName, relStart) === relStart) {
                 updateInitializeLines += `${refObjectName}.${statement};`
               }
-            });
+            }
 
             //find ref object name (refs)
-            for(const v of originalFuncCode.matchAll(new RegExp(jsxComponent.refName, 'g'))){
+            for (const v of originalFuncCode.matchAll(new RegExp(jsxComponent.refName, 'g'))) {
               try {
                 const varNode = this.Parser.parseExpressionAt(originalFuncCode, v.index, { ecmaVersion: 'latest', sourceType: "module" })
                 if (varNode.type === 'AssignmentExpression' || varNode.type === 'CallExpression') {
@@ -266,7 +254,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
 
       }
 
-    })
+    }
 
     if (!refObjectName) {  // no ref object found
       refObjectName = 'refs'
@@ -314,8 +302,8 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
     } else {
       hotListenerCode = `const newElem=Blue.r(Comp, attr)`
     }
-    hotListenerCode = 
-  `\n${selfVarName}.${this.UPDATE_LISTENER_FUNC_NAME} = (Comp, attr) =>{
+    hotListenerCode =
+      `\n${selfVarName}.${this.UPDATE_LISTENER_FUNC_NAME} = (Comp, attr) =>{
     ${hotListenerCode}
     ${selfVarName}.before(newElem);
     ${selfVarName}.remove();
@@ -329,8 +317,8 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
     }
 
     if (listenerAdded) {
-      hotListenerCode = 
-`\nif(import.meta.hot){
+      hotListenerCode =
+        `\nif(import.meta.hot){
   ${hotListenerCode}
 }else{
   console.warn('import.meta.hot does not exist')
@@ -345,7 +333,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
     return funcCode
   }
 
-  resolveFilePath(filepath: string, fromPath: string): string|false {
+  resolveFilePath(filepath: string, fromPath: string): string | false {
     const dPath = path.resolve(fromPath, '../', filepath)
     try {
       const stat = fs.statSync(dPath)
@@ -353,20 +341,20 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
         const filenames = fs.readdirSync(dPath)
         for (let i = filenames.length; i--;) {
           const filename = filenames[i]
-          if (/index\.[jt]sx$/.test(filename)) return filepath + '/' + filename
+          if (/index\.(?:[jt]sx|mdx?)$/.test(filename)) return filepath + '/' + filename
         }
       } else {
-        if(stat.isFile()) return filepath
+        if (stat.isFile()) return filepath
         return false
       }
     } catch (e) {
-      
+
       const filenames = fs.readdirSync(path.resolve(dPath, '../'))
       const targetFileName = path.basename(filepath)
       const parentDirName = path.dirname(filepath)
       for (let i = filenames.length; i--;) {
         const filename = filenames[i]
-        if (filenames.indexOf(targetFileName)===0 && /\.[jt]sx$/.test(filename)) return parentDirName + '/' + filename
+        if (filenames.indexOf(targetFileName) === 0 && /\.(?:[jt]sx|mdx?)$/.test(filename)) return parentDirName + '/' + filename
       }
     }
     return false
@@ -378,16 +366,16 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
       info: {}
     }
 
-    body.forEach(v => {
-      if (v.type !== 'ImportDeclaration' || v.source.value.indexOf('.') !== 0) return 0
-      const resolvedImportPath = this.resolveFilePath(v.source.value, filepath)
-      if(!resolvedImportPath) return 0
+    for (const node of body) {
+      if (node.type !== 'ImportDeclaration' || node.source.value.indexOf('.') !== 0) continue
+      const resolvedImportPath = this.resolveFilePath(node.source.value, filepath)
+      if (!resolvedImportPath) continue
       const info: ImportInfo = {
         src: resolvedImportPath,
         imports: {}
       }
-      imports.info[v.source.value] = info
-      v.specifiers.forEach(specifier => {
+      imports.info[node.source.value] = info
+      for (const specifier of node.specifiers) {
         let name: string = specifier.local.name
         if (specifier.type === 'ImportDefaultSpecifier') {
           //info.imports.default = name
@@ -398,8 +386,8 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
           info.imports[name] = specifier.imported.name
         }
         imports.varNames.push({ name, info })
-      })
-    })
+      }
+    }
     return imports
   }
   getExports(body: Node[]): Node[] {
@@ -410,32 +398,32 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
     const namesToLookFor: string[] = []
     const filterFuncs = (node: Node, checkName = false) => {
       const { type } = node
-      if (!checkName && type === 'FunctionDeclaration' || type === 'ArrowFunctionExpression'){
+      if (!checkName && type === 'FunctionDeclaration' || type === 'ArrowFunctionExpression') {
         funcNodes.push(node)
-      }else if (type === 'VariableDeclaration') {
-        if(checkName){
-          node.declarations.forEach((declaration: Node) =>{
-            if(namesToLookFor.includes(declaration.id.name)){
+      } else if (type === 'VariableDeclaration') {
+        if (checkName) {
+          for (const declaration of node.declarations) {
+            if (namesToLookFor.includes(declaration.id.name)) {
               filterFuncs(declaration.init)
             }
-          })
-        }else{
-          node.declarations.forEach((declaration: Node) => filterFuncs(declaration.init))
+          }
+        } else {
+          for (const declaration of node.declarations) filterFuncs(declaration.init)
         }
-      }else if(type === 'Identifier') namesToLookFor.push(node.name)
+      } else if (type === 'Identifier') namesToLookFor.push(node.name)
     }
-    for(let i=body.length;i--;){
+    for (let i = body.length; i--;) {
       const bNode = body[i]
       if (bNode.type === 'ExportDefaultDeclaration' || bNode.type === 'ExportNamedDeclaration') {
         const { declaration, specifiers } = bNode
         if (declaration) {
           filterFuncs(declaration)
-        }else{
-          specifiers.forEach(specifier=>{
+        } else {
+          specifiers.forEach(specifier => {
             filterFuncs(specifier.local)
           })
         }
-      }else if(namesToLookFor.length){
+      } else if (namesToLookFor.length) {
         filterFuncs(bNode, true)
       }
     }
@@ -444,14 +432,14 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
   /** returns list of  */
   getDependentJSXComponents(code: string, imports: ImportsData) {
     const jsxInfo: ImportedJSXData[] = [];
-    for(const v of code.matchAll(/Blue\.r\(([A-Z][A-z_]*)/g)){
+    for (const v of code.matchAll(/Blue\.r\(([A-Z][A-z_]*)/g)) {
       const compName = v[1]
       let blueCallNode: Node = this.Parser.parseExpressionAt(code, v.index, { ecmaVersion: 'latest', sourceType: "module" })
 
       if (blueCallNode.type === 'SequenceExpression') {
         blueCallNode = blueCallNode.expressions.find((v: Node) => v.start === blueCallNode.start)
       }
-      imports.varNames.forEach(i => {
+      for (const i of imports.varNames) {
         if (i.name === compName) {
 
           const importedJSXData: ImportedJSXData = {
@@ -462,7 +450,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
           }
           jsxInfo.push(importedJSXData)
         }
-      })
+      }
     }
     return jsxInfo
   }
