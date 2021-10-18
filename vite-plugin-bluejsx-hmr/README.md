@@ -1,7 +1,7 @@
 # Vite Plugin Bluejsx HMR
 
-This is a plugin for providing HMR (Hot Module Replacement) into vite development.
-## install
+This is a plugin to enable HMR (Hot Module Replacement) into your vite environment.
+## installation
 ```sh
 npm i -D @bluejsx/vite-plugin-blue-hmr
 ```
@@ -17,7 +17,7 @@ import HMRLoader, { hmrAdder } from '@bluejsx/vite-plugin-blue-hmr'
 ```ts
 hmrAdder.transform(code: string) : string
 ```
-- This takes in code and returns modified code to enable HMR
+- This takes in BlueJSX code and returns modified code which enables HMR
 - This would be useful if you want to add HMR for other file formats (e.g. `.mdx`)
 
 
