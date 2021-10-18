@@ -1,5 +1,5 @@
 import { Parser } from 'acorn';
-import HMRAdderBase from './HMRAdderBase.js';
+import HMRAdderBase from './HMRAdderBase';
 import path from 'path';
 import fs from 'fs';
 var _hotListenerInfo;
@@ -43,14 +43,26 @@ class HMRAdderAcorn extends HMRAdderBase {
         o.varMapCode += `${jsxComponent.info.imports[jsxComponent.name]}:${jsxComponent.name},`;
         o.listenCode += `
 if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
-  ${refObjectName}.${jsxComponent.refName}=${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}(${jsxComponent.name});
+  ${refObjectName}.${jsxComponent.refName}=${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}(${jsxComponent.name}, ${jsxComponent.attrObjCode ? jsxComponent.attrObjCode : 'null'});
   ${updateInitializeLines}
 }else{
   import.meta.hot.decline()
 }
 `;
     }
-    processFunctionCode(jsxComponents, funcNode, funcCode, wholeCode) {
+    /*
+  ${jsxComponent.attrObjCode ? 
+    `for(const key in ${jsxComponent.attrObjCode}){
+      const prop = props[key]
+      if(key==='ref') continue
+      else if(isSVG || ONLY_VIA_SET_ATTRIBUTE.has(key) || key.includes('-')){
+        element.setAttribute(key, prop)
+      } else {
+        //let's see if there would be any problem with IDL attr
+        element[key] = prop
+      }
+    }`: ''}
+*/ processFunctionCode(jsxComponents, funcNode, funcCode, wholeCode) {
         const insertRecord = this.getInsertRecord();
         const originalFuncCode = funcCode;
         const bodyNode = funcNode.body;
@@ -106,6 +118,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
             const attrNode = jsxComponent.node.arguments[1] // null | { attr: value }
             ;
             if (attrNode.type === 'ObjectExpression') {
+                jsxComponent.attrObjCode = originalFuncCode.substring(attrNode.start, attrNode.end);
                 const refAttrNode = attrNode.properties.find((v)=>v.key.name === 'ref'
                 ) // ref: [refs, 'elem']
                 ;
@@ -182,38 +195,31 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
             ], funcCode, insertRecord);
         }
         funcCode = this.insertCode(insertCodeToFirstLine, isDirectJSXArrowReturnFunc ? relBodyStartIndex : relBodyStartIndex + 1, funcCode, insertRecord);
-        let updateCode;
         let hotListenerCode = '';
         if (paramNode) {
-            updateCode = `${selfVarName}.${this.UPDATE_LISTENER_FUNC_NAME} = (Comp) =>{
-  const newElem=Comp(${this.PARAM_ALTER_NAME});
-  ${selfVarName}.before(newElem);
-  ${selfVarName}.remove();
-  return newElem
-}`;
+            hotListenerCode = `const newElem=Blue.r(Comp, attr, ${this.PARAM_ALTER_NAME}.children)`;
         } else {
-            updateCode = `${selfVarName}.${this.UPDATE_LISTENER_FUNC_NAME} = (Comp) =>{
-  const newElem=Comp();
-  ${selfVarName}.before(newElem);
-  ${selfVarName}.remove();
-  return newElem
-}`;
+            hotListenerCode = `const newElem=Blue.r(Comp, attr)`;
         }
-        //let listenerAdded = false
+        hotListenerCode = `\n${selfVarName}.${this.UPDATE_LISTENER_FUNC_NAME} = (Comp, attr) =>{
+    ${hotListenerCode}
+    ${selfVarName}.before(newElem);
+    ${selfVarName}.remove();
+    return newElem
+  }\n`;
+        let listenerAdded = false;
         for(const src in hotListenerInfo){
-            //listenerAdded || (listenerAdded = true)
+            listenerAdded || (listenerAdded = true);
             const listenerData = hotListenerInfo[src];
             hotListenerCode += `import.meta.hot.accept('${src}',({${listenerData.varMapCode}})=>{${listenerData.listenCode}});`;
         }
-        //if (listenerAdded) {
-        hotListenerCode = `
-${updateCode}
-if(import.meta.hot){
+        if (listenerAdded) {
+            hotListenerCode = `\nif(import.meta.hot){
   ${hotListenerCode}
 }else{
   console.warn('import.meta.hot does not exist')
 }\n`;
-        //}
+        }
         funcCode = this.insertCode(hotListenerCode, insertHotListenerPlace, funcCode, insertRecord);
         return funcCode;
     }
@@ -281,19 +287,39 @@ if(import.meta.hot){
     }
     getExportedFunctions(body) {
         const funcNodes = [];
-        const filterFuncs = (node)=>{
-            if (node.type === 'FunctionDeclaration' || node.type === 'ArrowFunctionExpression') funcNodes.push(node);
-            else if (node.type === 'VariableDeclaration') node.declarations.forEach((v)=>filterFuncs(v.init)
-            );
+        const namesToLookFor = [];
+        const filterFuncs = (node, checkName = false)=>{
+            const { type  } = node;
+            if (!checkName && type === 'FunctionDeclaration' || type === 'ArrowFunctionExpression') {
+                funcNodes.push(node);
+            } else if (type === 'VariableDeclaration') {
+                if (checkName) {
+                    node.declarations.forEach((declaration)=>{
+                        if (namesToLookFor.includes(declaration.id.name)) {
+                            filterFuncs(declaration.init);
+                        }
+                    });
+                } else {
+                    node.declarations.forEach((declaration)=>filterFuncs(declaration.init)
+                    );
+                }
+            } else if (type === 'Identifier') namesToLookFor.push(node.name);
         };
-        body.forEach((v)=>{
-            if (v.type === 'ExportDefaultDeclaration' || v.type === 'ExportNamedDeclaration') {
-                const { declaration  } = v;
+        for(let i = body.length; i--;){
+            const bNode = body[i];
+            if (bNode.type === 'ExportDefaultDeclaration' || bNode.type === 'ExportNamedDeclaration') {
+                const { declaration , specifiers  } = bNode;
                 if (declaration) {
                     filterFuncs(declaration);
+                } else {
+                    specifiers.forEach((specifier)=>{
+                        filterFuncs(specifier.local);
+                    });
                 }
+            } else if (namesToLookFor.length) {
+                filterFuncs(bNode, true);
             }
-        });
+        }
         return funcNodes;
     }
     /** returns list of  */ getDependentJSXComponents(code, imports) {

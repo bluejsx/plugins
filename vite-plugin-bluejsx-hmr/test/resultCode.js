@@ -2,8 +2,7 @@ import Menu from './Menu'
 import {title} from './index.module.scss'
 
 const { log } = console
-export default () => 
-   /* #ncjfdk */ {const refs={};const self=Blue.r('header', null,
+export default () =>{const refs={};const self=Blue.r('header', null,
      /* #ncjfdk */ Blue.r('div', {class: title}, "BlueJSX"),
      /* #ncjfdk */ Blue.r(Menu, null)
   )
