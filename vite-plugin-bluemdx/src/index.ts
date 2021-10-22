@@ -23,23 +23,30 @@ export default function mdxToJS(options: MarkdownIt.Options = {}) {
       // store the resolved config
       config = resolvedConfig
     },
-    transform(code, id) {
-      if (!id.includes('node_modules') && /\.mdx$/.test(id)) {
-        code = md.render(code)
-        let imports = ''
-        code = code.replace(regImports, (match)=>{
-          imports += match + ';'
-          return ''
-        })
-        code = `${imports}import Blue from 'bluejsx';export default ()=>${jsx.fromString(`<div>${code}</div>`, {
-          factory: 'Blue.r',
-          passUnknownTagsToFactory: true,
-          arrayChildren: false,
-        })}`
-        if(config.mode==='development'){
-          return hmrAdder.transform(code, id)
-        }else {
-          return code
+    transform(code: string, id: string) {
+      if (!id.includes('node_modules')) {
+        if (/\.mdx$/.test(id)) {
+          code = md.render(code)
+          let imports = ''
+          code = code.replace(regImports, (match) => {
+            imports += match + ';'
+            return ''
+          })
+          code = `${imports}import Blue from 'bluejsx';export default ()=>${jsx.fromString(`<div>${code}</div>`, {
+            factory: 'Blue.r',
+            passUnknownTagsToFactory: true,
+            arrayChildren: false,
+          })}`
+          if (config.mode === 'development') {
+            return hmrAdder.transform(code, id)
+          } else {
+            return code
+          }
+        }else if(/\.md$/.test(id)){
+          return `import Blue from 'bluejsx';export default ()=>${jsx.fromString(`<div>${md.render(code)}</div>`, {
+            factory: 'Blue.r',
+            passUnknownTagsToFactory: true,
+          })}`
         }
       }
     }

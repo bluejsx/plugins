@@ -6,7 +6,7 @@ import MarkdownIt from 'markdown-it';
 declare function mdxToJS(options?: MarkdownIt.Options): {
     name: string;
     configResolved(resolvedConfig: any): void;
-    transform(code: any, id: any): any;
+    transform(code: string, id: string): string;
 };
 
 export { mdxToJS as default };
