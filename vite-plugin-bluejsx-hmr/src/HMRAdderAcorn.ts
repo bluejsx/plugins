@@ -106,10 +106,14 @@ export default class HMRAdderAcorn extends HMRAdderBase {
   addHotListenerInfo(hotListenerInfo, jsxComponent, refObjectName, updateInitializeLines) {
     hotListenerInfo[jsxComponent.info.src] ??= {
       varMapCode: '',
-      listenCode: ''
+      listenCode: '',
+      usedCompNames: [],
     }
     const o = hotListenerInfo[jsxComponent.info.src]
-    o.varMapCode += `${jsxComponent.info.imports[jsxComponent.name]}:${jsxComponent.name},`
+    if(!o.usedCompNames.includes(jsxComponent.name)){
+      o.varMapCode += `${jsxComponent.info.imports[jsxComponent.name]}:${jsxComponent.name},`
+      o.usedCompNames.push(jsxComponent.name)
+    }
     o.listenCode +=
       `
 if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
@@ -151,6 +155,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
       [ket: string]: {
         varMapCode: string
         listenCode: string
+        usedCompNames: string[]
       }
     } = {}
     let refObjectName: string

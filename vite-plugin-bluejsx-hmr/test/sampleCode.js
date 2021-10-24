@@ -7,6 +7,8 @@ const Header = () =>
   <header >
     <div class={title}>BlueJSX</div>
     <Menu />
+    <Menu />
+    <Menu />
   </header>
 export default Header
 
