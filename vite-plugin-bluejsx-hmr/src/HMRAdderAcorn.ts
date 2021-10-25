@@ -78,7 +78,7 @@ export default class HMRAdderAcorn extends HMRAdderBase {
   }
   transform(code: string, path?: string) {
 
-    code = code.replace(/=>/g, '=> ')
+    code = code.replace(/=>/g, '=> ').replace(/Blue\.r\(([A-Z]\w*)[ \n]*\)/g, 'Blue.r($1, null)')
 
     const program = this.Parser.parse(code, { ecmaVersion: 'latest', sourceType: "module" })
     const originalCode = code
@@ -268,7 +268,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
     for (let i = execLater.length; i--;) {
       execLater[i]()
     }
-
+    let insertCodeBeforeHotListener = ''
     if (isDirectJSXArrowReturnFunc) {
       insertCodeToFirstLine = `{${insertCodeToFirstLine}const ${selfVarName}=`
       funcCode = this.insertCode(
@@ -282,10 +282,7 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
     } else if (isDirectJSXReturnFunc) {
 
       const selfCode = this.getCodeFragment([retNode.start - funcNode.start + 6, retNode.end - funcNode.start], funcCode, insertRecord)
-
-      insertCodeToFirstLine = `${insertCodeToFirstLine}
-      const ${selfVarName}=${selfCode};`
-
+      insertCodeBeforeHotListener = `const ${selfVarName}=${selfCode}`
       funcCode = this.replaceCode(
         `\nreturn ${selfVarName};`,
         [retNode.start - funcNode.start, retNode.start - funcNode.start + selfCode.length + 7],
@@ -314,21 +311,23 @@ if(${refObjectName}.${jsxComponent.refName}.${this.UPDATE_LISTENER_FUNC_NAME}){
     ${selfVarName}.remove();
     return newElem
   }\n`
-    let listenerAdded = false
+    //let listenerAdded = false
     for (const src in hotListenerInfo) {
-      listenerAdded || (listenerAdded = true)
+      //listenerAdded || (listenerAdded = true)
       const listenerData = hotListenerInfo[src]
       hotListenerCode += `import.meta.hot.accept('${src}',({${listenerData.varMapCode}})=>{${listenerData.listenCode}});`
     }
 
-    if (listenerAdded) {
+    //if (listenerAdded) {
       hotListenerCode =
-        `\nif(import.meta.hot){
+`
+${insertCodeBeforeHotListener}
+if(import.meta.hot){
   ${hotListenerCode}
 }else{
   console.warn('import.meta.hot does not exist')
 }\n`
-    }
+    //}
     funcCode = this.insertCode(
       hotListenerCode,
       insertHotListenerPlace,
