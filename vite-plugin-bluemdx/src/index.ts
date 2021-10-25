@@ -38,7 +38,7 @@ export default function mdxToJS(options: MarkdownIt.Options = {}) {
             arrayChildren: false,
           })}`
           if (config.mode === 'development') {
-            return hmrAdder.transform(code.replace(/Blue\.r\(([A-Z]\w*)[ \n]*\)/g, 'Blue.r($1, null)'), id)
+            return hmrAdder.transform(code, id)
           } else {
             return code
           }
