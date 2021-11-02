@@ -103,16 +103,24 @@ declare type ImportedJSXData = ImportsData['varNames'][0] & {
     hasRef?: boolean;
     attrObjCode?: string;
 };
+declare type HotListenerInfo = {
+    [ket: string]: {
+        varMapCode: string;
+        listenCode: string;
+        usedCompNames: string[];
+    };
+};
 declare class HMRAdderAcorn extends HMRAdderBase {
     Parser: typeof Parser;
     constructor();
     transform(code: string, path?: string): string;
-    addHotListenerInfo(hotListenerInfo: any, jsxComponent: any, refObjectName: any, updateInitializeLines: any): void;
-    processFunctionCode(jsxComponents: ImportedJSXData[], funcNode: Node, funcCode: string, wholeCode: string): string;
-    resolveFilePath(filepath: string, fromPath: string): string | false;
-    getImports(body: Node[], filepath: string): ImportsData;
-    getExports(body: Node[]): Node[];
-    getExportedFunctions(body: Node[]): Node[];
+    addHotListenerInfo(hotListenerInfo: HotListenerInfo, jsxComponent: any, refObjectName: any, updateInitializeLines: any): void;
+    processFunctionCode(jsxComponents: ImportedJSXData[], funcNode: Node, funcCode: string, imports: ImportsData, wholeCode: string): string;
+    private resolveFilePath;
+    private analyzeTree;
+    private filterImports;
+    private filterFuncs;
+    private filterExportedFuncs;
     /** returns list of  */
     getDependentJSXComponents(code: string, imports: ImportsData): ImportedJSXData[];
     getVars(searchVar: string, scopeCode: string): any[];
