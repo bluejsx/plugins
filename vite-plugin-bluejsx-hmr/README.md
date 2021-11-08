@@ -10,12 +10,12 @@ npm i -D @bluejsx/vite-plugin-blue-hmr
 ## Usage 
 
 ```js
-import HMRLoader, { hmrAdder } from '@bluejsx/vite-plugin-blue-hmr'
+import HMRLoader, { transform } from '@bluejsx/vite-plugin-blue-hmr'
 ```
 
-### `hmrAdder.transform`
+### `transform`
 ```ts
-hmrAdder.transform(code: string, path: string) : string
+transform(code: string, path: string) : string
 ```
 - This takes in BlueJSX code and file path, then returns modified code which enables HMR
 - This would be useful if you want to add HMR for other file formats (e.g. `.mdx`)
