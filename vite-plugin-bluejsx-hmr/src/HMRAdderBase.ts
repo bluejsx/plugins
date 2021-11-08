@@ -8,7 +8,7 @@ export default class HMRAdderBase {
   constructor(/*private code: string*/) {
 
   }
-  transform(code: string) {
+  transform(code: string, path: string) {
 
   }
   getImports(...args: any): any {

@@ -1,7 +1,9 @@
 import HMRAdderAcorn from './HMRAdderAcorn'
 import { PluginOption } from 'vite'
 
-export const hmrAdder = new HMRAdderAcorn()
+const hmrAdder = new HMRAdderAcorn()
+
+export const transform = (code: string, path: string) => hmrAdder.transform(code, path)
 
 export default function HMRLoader({ enabled } = { enabled: true }): PluginOption {
   return {

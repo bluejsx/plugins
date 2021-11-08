@@ -84,7 +84,7 @@ export default class HMRAdderAcorn extends HMRAdderBase {
     super();
     this.Parser = Parser
   }
-  transform(code: string, path?: string) {
+  transform(code: string, path: string) {
 
     code = code.replace(/=>/g, '=> ').replace(/Blue\.r\(([A-Z]\w*)[ \n]*\)/g, 'Blue.r($1, null)')
 
