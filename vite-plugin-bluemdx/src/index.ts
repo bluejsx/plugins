@@ -1,7 +1,7 @@
 import jsx from 'jsx-transform'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
-import { hmrAdder } from '@bluejsx/vite-plugin-blue-hmr'
+import { transform } from '@bluejsx/vite-plugin-blue-hmr'
 const regImports = /import +(?:[A-z0-9]*,? *)?(?:{ *(?:[A-z0-9]* *,?)* *})? *from *['"`][@A-z0-9\-\/\.?&]*['"`];?/g
 /**
  * @returns {import('vite').PluginOption}
@@ -38,7 +38,7 @@ export default function mdxToJS(options: MarkdownIt.Options = {}) {
             arrayChildren: false,
           })}`
           if (config.mode === 'development') {
-            return hmrAdder.transform(code, id)
+            return transform(code, id)
           } else {
             return code
           }
