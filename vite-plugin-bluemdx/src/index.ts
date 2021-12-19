@@ -11,8 +11,8 @@ export default function mdxToJS(options: MarkdownIt.Options = {}) {
   let config
   const md = new MarkdownIt({
     ...options,
-    highlight: function (code, lang) {
-      return hljs.highlightAuto(code, [lang]).value.replace(/([{}])/g, '{"$&"}').replace(/\n/g, '<br />')
+    highlight(code, language) {
+      return hljs.highlight(code, {language, ignoreIllegals: true}).value.replace(/([{}])/g, '{"$&"}').replace(/\n/g, '<br />')
     },
     html: true,
     xhtmlOut: true
