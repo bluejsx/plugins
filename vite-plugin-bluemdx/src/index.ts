@@ -12,7 +12,7 @@ export default function mdxToJS(options: MarkdownIt.Options = {}) {
   const md = new MarkdownIt({
     ...options,
     highlight(code, language) {
-      return hljs.highlight(code, {language, ignoreIllegals: true}).value.replace(/([{}])/g, '{"$&"}').replace(/\n/g, '<br />')
+      return hljs.highlight(code, {language}).value.replace(/([{}])/g, '{"$&"}').replace(/\n/g, '<br />')
     },
     html: true,
     xhtmlOut: true
