@@ -12,6 +12,7 @@ export default function mdxToJS(options: MarkdownIt.Options = {}) {
   const md = new MarkdownIt({
     ...options,
     highlight(code, language) {
+      if(!hljs.getLanguage(language)) language = 'txt'
       return hljs.highlight(code, {language}).value.replace(/([{}])/g, '{"$&"}').replace(/\n/g, '<br />')
     },
     html: true,
