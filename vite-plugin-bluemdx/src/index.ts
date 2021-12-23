@@ -10,11 +10,11 @@ export default function mdxToJS(options: MarkdownIt.Options = {}) {
   /** @type {import('vite').ResolvedConfig} */
   let config
   const md = new MarkdownIt({
-    ...options,
     highlight(code, language) {
       if(!hljs.getLanguage(language)) language = 'txt'
       return hljs.highlight(code, {language}).value.replace(/([{}])/g, '{"$&"}').replace(/\n/g, '<br />')
     },
+    ...options,
     html: true,
     xhtmlOut: true
   })

@@ -6,7 +6,7 @@ import fs, { constants, accessSync, statSync } from 'fs'
 import merge from 'deepmerge'
 import { URL } from 'url'
 
-export default function withPages(config: UserConfig): UserConfig {
+export default function withPages(config: Parameters<typeof withBlueJSX>[0]): UserConfig {
   withBlueJSX(config)
   /** html entry files */
   const entries = {}
