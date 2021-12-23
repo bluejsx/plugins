@@ -1,6 +1,6 @@
 {
   "name": "@bluejsx/vite-plugin-bluemdx",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "vite plugin for .mdx files with Bluejsx.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
