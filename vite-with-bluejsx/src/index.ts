@@ -3,6 +3,7 @@ import mdxLoader from '@bluejsx/vite-plugin-bluemdx'
 import { UserConfig } from 'vite'
 
 type MDXConfig = Parameters<typeof mdxLoader>[0]
+
 export default function withBlueJSX(config: UserConfig & {
   bluejsx?: {
     hmr?: boolean
