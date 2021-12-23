@@ -363,7 +363,7 @@ if(import.meta.hot){
       const parentDirName = path.dirname(filepath)
       for (let i = filenames.length; i--;) {
         const filename = filenames[i]
-        if (filenames.indexOf(targetFileName) === 0 && /\.(?:[jt]sx|mdx?)$/.test(filename)) return parentDirName + '/' + filename
+        if (filename.indexOf(targetFileName) === 0 && /\.(?:[jt]sx|mdx?)$/.test(filename)) return parentDirName + '/' + filename
       }
     }
     return false
